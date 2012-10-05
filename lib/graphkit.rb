@@ -1,8 +1,8 @@
 script_folder = File.dirname(File.expand_path(__FILE__))
 
 require 'pp'
-require script_folder + '/box_of_tricks.rb'
-require script_folder + '/gnuplot.rb'
+#require script_folder + '/box_of_tricks.rb'
+#require script_folder + '/gnuplot.rb'
 
 class Matrix
 	def shape
@@ -895,6 +895,10 @@ end
 
 end # class GraphKit
 
+require 'graphkit/gnuplot.rb'
+require 'graphkit/mm.rb'
+require 'graphkit/csv.rb'
+require 'graphkit/vtk_legacy_ruby.rb'
 # end #class CodeRunner
 
 
