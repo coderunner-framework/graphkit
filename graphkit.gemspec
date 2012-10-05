@@ -14,15 +14,18 @@ Gem::Specification.new do |s|
   s.email = "edmundhighcock@sourceforge.net"
   s.extra_rdoc_files = [
     "LICENSE.txt",
+    "README.md",
     "README.rdoc"
   ]
   s.files = [
     ".document",
     "Gemfile",
     "LICENSE.txt",
+    "README.md",
     "README.rdoc",
     "Rakefile",
     "VERSION",
+    "graphkit.gemspec",
     "lib/graphkit.rb",
     "lib/graphkit/csv.rb",
     "lib/graphkit/gnuplot.rb",
