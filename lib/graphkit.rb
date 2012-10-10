@@ -1,6 +1,7 @@
 script_folder = File.dirname(File.expand_path(__FILE__))
 
 require 'pp'
+require 'rubyhacks'
 #require script_folder + '/box_of_tricks.rb'
 #require script_folder + '/gnuplot.rb'
 

@@ -21,6 +21,7 @@ Jeweler::Tasks.new do |gem|
   gem.description = %Q{A GraphKit is a device independent intelligent data container that allows the easy sharing, combining and plotting of graphic data representations. Easily created from data, they can be output in a variety of formats using packages such as gnuplot. }
   gem.email = "edmundhighcock@sourceforge.net"
   gem.authors = ["Edmund Highcock"]
+	gem.required_ruby_version = '>= 1.9.1'
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
