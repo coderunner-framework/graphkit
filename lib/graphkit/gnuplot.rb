@@ -62,8 +62,12 @@ module Gnuplot
 		#FileUtils.rm  ".gptemp#{Process.pid}"
 
 
-    IO::popen( cmd, "w") { |io| yield io }
-	  #yield(STDOUT)
+		if $debug_gnuplot
+			#raise "HEELOOE"
+	  	yield(STDOUT)
+		else
+    	IO::popen( cmd, "w") { |io| yield io }
+		end
   end 
     
   
@@ -469,7 +473,6 @@ end
 					else
 						gp.term ||= "epslatex color dashed size #{options[:size] or "3.5in,#{options[:height] or "2.0in"}"} colortext standalone 8"
 						(gp.term += " header '#{options[:preamble].inspect.gsub(/\\\n/, "\\\\\\n")}'"; options.delete(:preamble)) if options[:preamble]
-						gp.output = file_name.sub(/\.eps/, '.tex')
 					end
 				when '.jpg'
 					gp.term = "jpeg size  #{options[:size] or "3.5in,2.33in"}"
@@ -481,12 +484,15 @@ end
 				end
 			end
 		end
+		
+		gp.output = file_name.sub(/\.eps/, '.tex') if options[:latex]
 		options.delete(:size)
 		gnuplot(options)
 		if options[:latex]
 				name = file_name.sub(/\.eps$/, '')
-				raise 'latex failed' unless system "latex #{name}.tex"
-				raise 'dvips failed' unless system "dvips #{name}.dvi -o #{name}.ps"
+				raise "No file output by gnuplot" unless FileTest.exist? name + '.tex'
+				raise 'latex failed' unless system "latex #{name}.tex --interaction nonstopmode --halt-on-error -q"
+				raise 'dvips failed' unless system "dvips #{name}.dvi"
 				FileUtils.rm "#{name}.eps" if FileTest.exist? "#{name}.eps"
 				raise 'ps2eps failed' unless system "ps2eps #{name}.ps"
 		end
