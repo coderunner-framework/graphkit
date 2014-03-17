@@ -88,6 +88,7 @@ class GraphKit
 		end
 	end
 class GnuplotSetOptions < KitHash
+	attr_accessor :multiplot_following
 	alias :hash_key :key
 	undef :key
     QUOTED = [ "title", "output", "xlabel", "ylabel", "zlabel", "x2label", "y2label", "z2label"  ]
@@ -103,7 +104,7 @@ class GnuplotSetOptions < KitHash
     isosamples        key               label             lmargin
     loadpath          locale            log               logscale
     macros            mapping           margin            missing
-    mouse             multiplot         mx2tics           mxtics
+    mouse                     mx2tics           mxtics
     my2tics           mytics            mztics            object
 		nosurface
     offsets           origin            output            palette
@@ -122,7 +123,8 @@ class GnuplotSetOptions < KitHash
     y2zeroaxis        ydata             ydtics            ylabel
     ymtics            yrange            ytics             yzeroaxis
     zdata             zdtics            zero              zeroaxis
-    zlabel            zmtics            zrange            ztics].map{|s| s.to_sym}
+    zlabel            zmtics            zrange            ztics
+	  multiplot ].map{|s| s.to_sym}
 # 		p instance_methods.sort
 		GNUPLOT_SETS.each do |opt|
 			define_method(opt + "=".to_sym) do |str|
@@ -141,12 +143,21 @@ class GnuplotSetOptions < KitHash
 		end
 
 		def apply(io)
+			io << "set term #{GNUPLOT_DEFAULT_TERM}\n" unless self[:term] or self.multiplot_following
 			self.each do |var,val|
 				next unless val
+				next if self.multiplot_following and ["term", "output"].include? var.to_s
+				next if var.to_s == "multiplot"
+				apply_option(io, var, val)
+      end
+			apply_option(io, :multiplot, self[:multiplot]) if self[:multiplot]
+		end
+
+		def apply_option(io, var, val)
 				if val == "unset"
  					#eputs "Unsetting #{var}"
 					io << "unset #{var}\n"
-					next
+					return
 				end
 	      if var.to_s == 'log_axis'
 		      var = 'log'
@@ -161,8 +172,6 @@ class GnuplotSetOptions < KitHash
 				else
 					io << "set #{var} #{val}\n" 
 				end
-      end
-			io << "set term #{GNUPLOT_DEFAULT_TERM}\n" unless self[:term]
 		end
 		
 
@@ -291,45 +300,55 @@ end
 		apply_gnuplot_options(options)
 		apply_graphkit_standard_options_to_gnuplot
 		check_integrity
-		Gnuplot.open(true) do |io|
-				self.pid = io.pid
-				gnuplot_sets.apply(io)
-				gnuplot_variables.apply(io)
-				case naxes
-				when 1,2
-					io << "plot "
-				when 3,4
-					io << "splot "
-				end
-				imax = data.size - 1
-				data.each_with_index do |dk,i|
-					next if i>0 and compress_datakits
-					dk.gnuplot_plot_options.with ||= dk.with #b.c.
-					dk.gnuplot_plot_options.title ||= dk.title #b.c.
-					dk.gnuplot_plot_options.apply(io)
-					#p 'imax', imax, i, i == imax
-					next if compress_datakits
-					io << ", " unless i == imax
-				end
-				io << "\n"
-				data.each_with_index do |dk,i|
-					dk.gnuplot(io)
-					 unless compress_datakits and i<imax
-						io << "e\n\n"
-					 else
-						 io << "\n\n"
-					 end
-				end
-				(STDIN.gets) if live
+		if options[:io]
+			send_gnuplot_commands(io)
+		else
+			Gnuplot.open(true) do |io|
+					send_gnuplot_commands(io)
+					(STDIN.gets) if live
+			end
 		end
+	end
+
+	def send_gnuplot_commands(io)
+			self.pid = io.pid
+			gnuplot_sets.apply(io)
+			gnuplot_variables.apply(io)
+			case naxes
+			when 1,2
+				io << "plot "
+			when 3,4
+				io << "splot "
+			end
+			imax = data.size - 1
+			data.each_with_index do |dk,i|
+				next if i>0 and compress_datakits
+				dk.gnuplot_plot_options.with ||= dk.with #b.c.
+				dk.gnuplot_plot_options.title ||= dk.title #b.c.
+				dk.gnuplot_plot_options.apply(io)
+				#p 'imax', imax, i, i == imax
+				next if compress_datakits
+				io << ", " unless i == imax
+			end
+			io << "\n"
+			data.each_with_index do |dk,i|
+				dk.gnuplot(io)
+				 unless compress_datakits and i<imax
+					io << "e\n\n"
+				 else
+					 io << "\n\n"
+				 end
+			end
 	end
 	
 	def close
 		logf :close
 		begin
+			#require 'sys/proctable'
+			#p Sys::ProcTable.ps.select{ |pe| pe.ppid == pid }
 			Process.kill('TERM', pid) if pid
 		rescue => err
-			puts err
+			puts err, pid
 		end
 		self.pid = nil
 	end
@@ -459,6 +478,8 @@ end
 									 		
 	def gnuplot_write(file_name, options={})
 		logf :gnuplot_write
+		old_gp_term = gp.term
+		old_gp_output = gp.output
 		if file_name
 			gp.output = file_name
 			unless gp.term or options[:terminal]
@@ -497,6 +518,8 @@ end
 				raise 'ps2eps failed' unless system "ps2eps #{name}.ps"
 		end
 # 		ep file_name
+    gp.term = old_gp_term
+		gp.output = old_gp_output
 		return File.basename(file_name, File.extname(file_name))
 	end
 	
@@ -531,6 +554,33 @@ EOF
 
 
 
+	class MultiWindow
+
+		def method_missing(meth, *args)
+			if args[-1].kind_of? Hash
+			options = args.pop 
+			else 
+				options = {}
+			end
+			raise "Nothing to plot: size = 0" if size==0
+			self[0].gp.multiplot = "layout #{size},1"
+			for i in 1...self.size
+				self[i].gp.multiplot_following = true
+			end
+			Gnuplot.open(true) do |io|
+				options[:io] = io
+				each do |gk|
+					#p gk.to_s
+					gk
+					gk.send(meth, *args, options)
+				end
+				options.delete(:io)
+			end
+			for i in 1...self.size
+				self[i].multiplot = false
+			end
+		end
+	end
 
 
 	end
