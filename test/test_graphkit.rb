@@ -76,7 +76,7 @@ class TestGraphkit < Test::Unit::TestCase
 	pp multiplot
 
 	#multiplot.gnuplot
-	multiplot.gnuplot_write('multiplot.ps')
+	multiplot.gnuplot_write('multiplot.ps', multiplot: 'layout 2,2')
 	end
 
 end

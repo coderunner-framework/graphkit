@@ -563,7 +563,7 @@ EOF
 				options = {}
 			end
 			raise "Nothing to plot: size = 0" if size==0
-			self[0].gp.multiplot = "layout #{size},1"
+			self[0].gp.multiplot = options[:multiplot] || "layout #{size},1"
 			for i in 1...self.size
 				self[i].gp.multiplot_following = true
 			end
