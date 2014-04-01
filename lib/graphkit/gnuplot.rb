@@ -556,6 +556,13 @@ EOF
 
 	class MultiWindow
 
+		def gnuplot_sets
+			# gnuplot_options included for back. comp
+			@gnuplot_sets ||=  GnuplotSetOptions.new
+			@gnuplot_sets
+		end
+		alias :gp :gnuplot_sets
+
 		def method_missing(meth, *args)
 			if args[-1].kind_of? Hash
 			options = args.pop 
@@ -563,11 +570,13 @@ EOF
 				options = {}
 			end
 			raise "Nothing to plot: size = 0" if size==0
-			self[0].gp.multiplot = options[:multiplot] || "layout #{size},1"
-			for i in 1...self.size
+			#self[0].gp.multiplot = options[:multiplot] || "layout #{size},1"
+			gp.multiplot = options[:multiplot] || "layout #{size},1"
+			for i in 0...self.size
 				self[i].gp.multiplot_following = true
 			end
 			Gnuplot.open(true) do |io|
+				@gnuplot_sets.apply(io)
 				options[:io] = io
 				each do |gk|
 					#p gk.to_s
@@ -576,8 +585,8 @@ EOF
 				end
 				options.delete(:io)
 			end
-			for i in 1...self.size
-				self[i].multiplot = false
+			for i in 0...self.size
+				self[i].multiplot_following = false
 			end
 		end
 	end
