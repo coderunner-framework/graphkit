@@ -476,8 +476,9 @@ end
 										
 
 									 		
+	module Writer
 	def gnuplot_write(file_name, options={})
-		logf :gnuplot_write
+		#logf :gnuplot_write
 		old_gp_term = gp.term
 		old_gp_output = gp.output
 		if file_name
@@ -522,6 +523,7 @@ end
 		gp.output = old_gp_output
 		return File.basename(file_name, File.extname(file_name))
 	end
+	end
 	
 	def self.latex_multiplot(name, options={})
 		name = name.sub(/\.eps$/, '')
@@ -555,6 +557,7 @@ EOF
 
 
 	class MultiWindow
+		include Writer
 
 		def gnuplot_sets
 			# gnuplot_options included for back. comp
@@ -571,7 +574,7 @@ EOF
 			end
 			raise "Nothing to plot: size = 0" if size==0
 			#self[0].gp.multiplot = options[:multiplot] || "layout #{size},1"
-			gp.multiplot = options[:multiplot] || "layout #{size},1"
+			gp.multiplot ||= options[:multiplot] || "layout #{size},1"
 			for i in 0...self.size
 				self[i].gp.multiplot_following = true
 			end
