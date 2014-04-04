@@ -524,6 +524,7 @@ end
 		return File.basename(file_name, File.extname(file_name))
 	end
 	end
+	include Writer
 	
 	def self.latex_multiplot(name, options={})
 		name = name.sub(/\.eps$/, '')
@@ -556,7 +557,7 @@ EOF
 
 
 
-	class MultiWindow
+	class MultiKit
 		include Writer
 
 		def gnuplot_sets

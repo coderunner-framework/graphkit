@@ -71,6 +71,9 @@ class TestGraphkit < Test::Unit::TestCase
 	multiplot = GraphKit::MultiWindow.new
 	multiplot.push a
 	multiplot.push b
+
+	multiplot2 = GraphKit::MultiKit.new([GraphKit.quick_create([[0,3], [2,4]])])
+	multiplot.merge(multiplot2)
 	 
 
 	pp multiplot

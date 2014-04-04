@@ -276,9 +276,14 @@ end
 class GraphKit < KitHash
 
 
-	class MultiWindow < Array
-
+	class MultiKit < Array
+		def merge(other)
+			size.times do |i|
+			 self[i] += other[i] if other[i]
+			end
+		end		
 	end
+	MultiWindow = MultiKit # Backwards compatibility
 
 	
 	
