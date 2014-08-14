@@ -281,7 +281,9 @@ class GraphKit < KitHash
 			size.times do |i|
 			 self[i] += other[i] if other[i]
 			end
+			self
 		end		
+
 	end
 	MultiWindow = MultiKit # Backwards compatibility
 
