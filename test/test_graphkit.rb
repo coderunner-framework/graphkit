@@ -74,6 +74,9 @@ class TestGraphkit < Test::Unit::TestCase
 
 	multiplot2 = GraphKit::MultiKit.new([GraphKit.quick_create([[0,3], [2,4]])])
 	multiplot.merge(multiplot2)
+
+  p multiplot.inspect
+  assert_equal(GraphKit::MultiKit, eval(multiplot.inspect).class )
 	 
 
 	pp multiplot

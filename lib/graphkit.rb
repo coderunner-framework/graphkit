@@ -277,6 +277,14 @@ class GraphKit < KitHash
 
 
 	class MultiKit < Array
+
+    def self.uninspect(arr, ivars)
+      mkit = new(arr)
+      ivars.each do |var,val|
+        mkit.instance_variable_set(var,val)
+      end
+      mkit
+    end
 		def merge(other)
 			size.times do |i|
 			 self[i] += other[i] if other[i]
@@ -286,6 +294,10 @@ class GraphKit < KitHash
 
     def +(other)
       merge(other)
+    end
+
+    def inspect
+      "GraphKit::MultiKit.uninspect(#{super}, :@gnuplot_sets=>#{@gnuplot_sets.inspect})"
     end
 
 
