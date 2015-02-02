@@ -284,6 +284,11 @@ class GraphKit < KitHash
 			self
 		end		
 
+    def +(other)
+      merge(other)
+    end
+
+
 	end
 	MultiWindow = MultiKit # Backwards compatibility
 
