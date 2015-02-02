@@ -572,7 +572,13 @@ EOF
 		end
 		alias :gp :gnuplot_sets
 
-		def method_missing(meth, *args)
+    def method_missing(meth, *args)
+      self[0].send(meth, *args)
+    end 
+
+		def gnuplot(*args)
+      meth = :gnuplot
+      #unless [:gnuplot, :gnuplot_write].include? 
 			if args[-1].kind_of? Hash
 			options = args.pop 
 			else 
