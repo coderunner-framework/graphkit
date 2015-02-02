@@ -124,7 +124,12 @@ class GnuplotSetOptions < KitHash
     ymtics            yrange            ytics             yzeroaxis
     zdata             zdtics            zero              zeroaxis
     zlabel            zmtics            zrange            ztics
-	  multiplot ].map{|s| s.to_sym}
+	  multiplot 
+    xticlabels
+    yticlabels
+  
+  
+  ].map{|s| s.to_sym}
 # 		p instance_methods.sort
 		GNUPLOT_SETS.each do |opt|
 			define_method(opt + "=".to_sym) do |str|
