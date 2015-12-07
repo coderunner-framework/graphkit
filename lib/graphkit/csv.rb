@@ -7,7 +7,7 @@ class GraphKit
     ep 'to_csv'
     stringio = options[:io] || StringIO.new
     data.each do |dk|
-      dk.to_csv(io: stringio)
+      dk.to_csv(options)
       stringio <<  "\n\n"
     end
     return stringio.string unless options[:io]
@@ -26,15 +26,21 @@ class GraphKit
     end
     def to_csv(options={})
       io = options[:io] || StringIO.new
+      header = options[:header].to_s
+      csv_file = File.open(io, 'w')
+      if header
+        csv_file.write(header + "\n")
+      end
+
       axs = self.axes.values_at(*AXES).compact
       #ep 'axs', axs
       dl = axs[-1].shape.product
       dat = axs.map{|ax| ax.data}
       sh = shapes
-      cml_sh = sh.map do |sh1|
-        cml = 1
-        sh1.reverse.map{|dim| cml *= dim; cml}.reverse
-      end
+      #cml_sh = sh.map do |sh1|
+      #  cml = 1
+      #  sh1.reverse.map{|dim| cml *= dim; cml}.reverse
+      #end
       dat = dat.map do |d|
         d.kind_of?(Array) ? TensorArray.new(d) : d
       end
@@ -44,10 +50,12 @@ class GraphKit
         edat = self.errors.values_at(:x, :xmin, :xmax, :y, :ymin, :ymax).compact
         #ep 'edat', edat
       end
+
+      io = ''
       case ranks
       when [1], [1,1], [1,1,1], [1,1,1,1]
         dl.times do |n| 
-          dat.each{|d| io << d[n] << " "}
+          dat.each{|d| io << d[n].to_s << ","}
           io << " " << edat.map{|e| e[n].to_s}.join(", ") if self.errors
           io << "\n"
         end
@@ -123,6 +131,9 @@ class GraphKit
       end
 
       return stringio.string unless options[:io]
+      
+      csv_file.write(io)
+      csv_file.close()
     end
   end
 end
