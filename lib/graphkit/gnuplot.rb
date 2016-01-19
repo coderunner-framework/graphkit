@@ -42,7 +42,7 @@ module Gnuplot
   def Gnuplot.gnuplot( persist = true )
     cmd = which( ENV['RB_GNUPLOT'] || 'gnuplot' )
 		#cmd = "gnuplot"
-    cmd += " -background white" 
+    #cmd += " -background white"
     cmd += " -persist" if persist
     cmd
   end
