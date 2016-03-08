@@ -17,7 +17,7 @@ class TestGraphkit < Minitest::Unit::TestCase
     a.to_csv({io:'test/test_output/csv_single_dk.csv'})
 
     f = File.read('test/test_output/csv_single_dk.csv')
-    assert_equal(f, "\n1,4,\n2,5,\n3,6,\n")
+    assert_equal(f, "1,4,\n2,5,\n3,6,\n")
   end
 
   def test_to_csv_single_dk_with_header
@@ -31,6 +31,33 @@ class TestGraphkit < Minitest::Unit::TestCase
     assert_equal(f, "test1, test2\n1,4,\n2,5,\n3,6,\n")
   end
 
+  def test_to_csv_append
+    a = GraphKit.autocreate({x: {data: [1]},
+                             y: {data: [2]}})
+    b = GraphKit.autocreate({x: {data: [3]},
+                             y: {data: [4]}})
+
+    a.to_csv({io:'test/test_output/csv_append.csv'})
+    b.to_csv({io:'test/test_output/csv_append.csv', append:true})
+
+    f = File.read('test/test_output/csv_append.csv')
+    assert_equal(f, "1,2,\n3,4,\n")
+  end
+
+  def test_to_csv_append_with_header
+    a = GraphKit.autocreate({x: {data: [1]},
+                             y: {data: [2]}})
+    b = GraphKit.autocreate({x: {data: [3]},
+                             y: {data: [4]}})
+
+    a.to_csv({io:'test/test_output/csv_append_with_header.csv',
+              header:'test1,test2'})
+    b.to_csv({io:'test/test_output/csv_append_with_header.csv',
+              header:'test1,test2', append:true})
+
+    f = File.read('test/test_output/csv_append_with_header.csv')
+    assert_equal(f, "test1,test2\n1,2,\n3,4,\n")
+  end
   def test_sparse_tensor_new
     t = SparseTensor.new(3)
     assert_equal(t.shape, [0,0,0])

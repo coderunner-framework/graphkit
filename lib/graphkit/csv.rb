@@ -25,21 +25,25 @@ class GraphKit
     end
     def to_csv(options={})
       io = options[:io] || StringIO.new
-      header = options[:header].to_s
-      csv_file = File.open(io, 'w')
-      if header
+
+      if options[:append]
+        if File.exists?(io)
+          options[:header] = nil
+        end
+        csv_file = File.open(io, 'a')
+      else
+        csv_file = File.open(io, 'w')
+      end
+
+      unless options[:header].nil?
+        header = options[:header].to_s
         csv_file.write(header + "\n")
       end
 
       axs = self.axes.values_at(*AXES).compact
-      #ep 'axs', axs
       dl = axs[-1].shape.product
       dat = axs.map{|ax| ax.data}
       sh = shapes
-      #cml_sh = sh.map do |sh1|
-      #  cml = 1
-      #  sh1.reverse.map{|dim| cml *= dim; cml}.reverse
-      #end
       dat = dat.map do |d|
         d.kind_of?(Array) ? TensorArray.new(d) : d
       end
@@ -47,7 +51,6 @@ class GraphKit
       if self.errors
         raise "Errors can only be plotted for 1D or 2D data" unless ranks == [1] or ranks == [1,1]
         edat = self.errors.values_at(:x, :xmin, :xmax, :y, :ymin, :ymax).compact
-        #ep 'edat', edat
       end
 
       io = ''
