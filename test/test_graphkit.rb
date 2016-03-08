@@ -1,6 +1,6 @@
 require 'helper'
 
-class TestGraphkit < Test::Unit::TestCase
+class TestGraphkit < Minitest::Unit::TestCase
 
   def test_basic
     a = GraphKit.autocreate({x: {data: [2, 5, 11, 22],
