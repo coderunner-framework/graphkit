@@ -2,6 +2,10 @@ require 'helper'
 
 class TestGraphkit < Minitest::Unit::TestCase
 
+  def setup
+    FileUtils.makedirs('test/test_output')
+  end
+
   def test_basic
     a = GraphKit.autocreate({x: {data: [2, 5, 11, 22],
                                  units: 'years',
@@ -22,7 +26,7 @@ class TestGraphkit < Minitest::Unit::TestCase
     b.data[0].modify({with: 'lp'})
 
     b.close
-    b.gnuplot_write('test/heights.ps')
+    b.gnuplot_write('test/test_output/heights.ps')
 
     c = SparseTensor.new(3)
     c[1,3,9]= 4
@@ -43,7 +47,10 @@ class TestGraphkit < Minitest::Unit::TestCase
 
     assert_equal(GraphKit::MultiKit, eval(multiplot.inspect).class )
 
-    multiplot.gnuplot_write('test/multiplot.ps', multiplot: 'layout 2,2')
+    multiplot.gnuplot_write('test/test_output/multiplot.ps', multiplot: 'layout 2,2')
   end
 
+  def teardown
+    FileUtils.rm_r('test/test_output')
+  end
 end
