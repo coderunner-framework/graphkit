@@ -1,4 +1,4 @@
-script_folder = File.dirname(File.expand_path(__FILE__))
+# script_folder = File.dirname(File.expand_path(__FILE__))
 
 require 'pp'
 require 'rubyhacks'
@@ -40,29 +40,29 @@ end
 class SparseTensor < Hash
 	class RankError < StandardError
 	end
-	
+
 # 	class Key < Array
 # 		def ==
-# 			
+#
 # 	end
-	
-	
+
+
 	attr_reader :rank, :shape
 	#attr_accessor :default_val
-	
+
 	# Create a new tensor.
-	
+
 	def initialize(rank = 2)
 		@rank = rank
 		@shape = [0]*rank
 		super()
 	end
-	
-	# Create a new diagonal tensor from an array. E.g. if rank was 2, then 
+
+	# Create a new diagonal tensor from an array. E.g. if rank was 2, then
 	# 	tensor[0,0] = array[0]
 	# 	tensor[1,1] = array[1]
 	# Etc.
-	
+
 	def self.diagonal(rank, array)
 		tensor = new(rank)
 		for index in 0...array.size
@@ -70,11 +70,11 @@ class SparseTensor < Hash
 		end
 		tensor
 	end
-	
+
 	# Access an element of the tensor. E.g. for a rank 2 tensor
 	#
 	# 	a = tensor[1,3]
-	
+
 	def [](*args)
 		args = args[0] if args.size == 1 and not args.size == @rank and args[0].size == @rank
 # 		p args
@@ -91,11 +91,11 @@ class SparseTensor < Hash
 		#end
 
 	end
-	
+
 	# Set an element of the tensor. E.g. for a rank 2 tensor
 	#
 	# 	tensor[1,3] = a_variable
-	
+
 	def []=(*args)
 		value = args.pop
 		args = args[0] if args.size == 1 and args[0].size == @rank
@@ -105,18 +105,18 @@ class SparseTensor < Hash
 		end
 		super(args, value)
 	end
-	
+
 	# Perform some action involving all the elements of this tensor and another.
-	# 
+	#
 	# E.g.
 	# 	tensor_1.scalar_binary(tensor_2) do |element_1, element_2|
 	# 		element_1 + element_2
 	# 	end
 	#
 	# will add every element of tensor_1 to every corresponding element of tensor_2.
-			
-	
-	
+
+
+
 	def scalar_binary(other, &block)
 		raise ArgumentError unless other.class == self.class
 		raise RankError.new("Different ranks: #@rank, #{other.rank}") unless other.rank == @rank
@@ -138,21 +138,21 @@ class SparseTensor < Hash
 	def -(other)
 		scalar_binary(other){|a, b| a - b}
 	end
-	
+
 	# Find the maximum element of the tensor. See Enumerable#max.
-	
+
 	def max(&block)
 		return self.values.max(&block)
 	end
-	
+
 	# Find the minimum element of the tensor. See Enumerable#max.
-	
+
 	def min(&block)
 		return self.values.min(&block)
 	end
 
 
-	
+
 	def alter!(&block)
 		self.keys.each do |k|
 			self[k] = yield(self[k])
@@ -170,17 +170,17 @@ class SparseTensor < Hash
 
 end
 
-	
-	
+
+
 
 # To be mixed in to a Hash. Basically allows access the elements of a hash via method names rather than brackets.
 
 
 module Kit
-	
+
 	class IntegrityError < StandardError
 	end
-	
+
 	def method_missing(method, *args)
 # 		p method, args
 		m = method.to_s
@@ -193,10 +193,10 @@ module Kit
 			return send(method)
 		end
 	end
-	
+
 	def check(*values, &block)
 		values.each do |arr|
-			case arr.size 
+			case arr.size
 			when 2
 				expression, test_data = arr
 				if block
@@ -218,11 +218,11 @@ module Kit
 			end
 		end
 	end
-	
-	
-	
 
-	
+
+
+
+
 end
 
 # See Kit
@@ -251,26 +251,26 @@ end
 # GraphKit also allows you access any property, e.g. title, as
 #
 #	graphkit.title
-#	
-#	graphkit.title = 
+#
+#	graphkit.title =
 #
 # as well as the hash form:
 #
 #	graphkit[:title]
 #	graphkit[:title] =
-# 
+#
 # GraphKits have methods which allow the graphs to be rendered using standard visualisation packages. At present only gnuplot is supported, but others are planned.
 #
 # GraphKits overload certain operators, for example <tt>+</tt>, which mean that they can be combined easily and intuitively. This makes plotting graphs from different sets of results on the same page as easy as adding 2+2!
-# 
+#
 # GraphKits define a minimum set of keys which are guaranteed to be meaningful and work on all platforms. If you stick to using just these properties, you'll be able to easily plot basic graphs. If you need more control and customisation, you need to look at the documentation both for the visualisation package (e.g. gnuplot) and the module which allows a GraphKit to interface with that package (e.g. GraphKit::Gnuplot).
 #
 # Here is the specification for the standard keys:
-# 
+#
 # * title (String): the title of the graph
 # * xlabel, ylabel, zlabel (String): axis labels
 # * xrange, yrange, zrange, frange (Array): ranges of the three dimensions and possibly the function as well.
-# * data (Array of GraphKit::DataKits): the lines of data to be plotted. 
+# * data (Array of GraphKit::DataKits): the lines of data to be plotted.
 
 
 class GraphKit < KitHash
@@ -290,7 +290,7 @@ class GraphKit < KitHash
 			 self[i] += other[i] if other[i]
 			end
 			self
-		end		
+		end
 
     def +(other)
       merge(other)
@@ -304,8 +304,8 @@ class GraphKit < KitHash
 	end
 	MultiWindow = MultiKit # Backwards compatibility
 
-	
-	
+
+
 	include Kit
 	include Log
 	AXES = [:x, :y, :z, :f]
@@ -313,73 +313,73 @@ class GraphKit < KitHash
 	DEFAULT_COLOURS_GNUPLOT = DEFAULT_COLOURS
 	DEFAULT_COLOURS_MATHEMATICA = DEFAULT_COLOURS.inject({}) do |hash, (i, coll)|
 		hash[i] = coll.sub(/#/, '').scan(/.{2}/).map{|str| (eval("0x#{str}").to_f / 255.0).round(2)}
-	  hash	
+	  hash
 	end
 
 # 	attr_reader :gnuplot_options
-	
+
 	alias :hash_key :key
 	undef :key
-	
+
 	# Greate a new graphkit. Rarely used: see GraphKit.autocreate and GraphKit.quick_create
-	
+
 	def initialize(naxes=0, hash = {})
 		logf :initialize
 		super()
-		self[:naxes] = naxes 
+		self[:naxes] = naxes
 		self[:data] = []
 		hash
 # 		@gnuplot_options = GnuplotOptions.new
 	end
-	
+
 # 	def gnuplot_options
 # 		@gnuplot_options ||= GnuplotOptions.new
 # 		@gnuplot_options
 # 	end
-	
+
 # 	alias :gp :gnuplot_options
-	
+
 	class DataError < StandardError
 	end
-	
+
 	# Create a new graphkit with one hash for every datakit (each datakit corresponds to a line or surface on the graph). Each hash should contain specifications for the axes of the graph (see AxisKit#autocreate).
 	#
 	# E.g.
 	# 	kit = GraphKit.autocreate(
 	# 		{
-	# 			x: {data: [1,2,3], title 'x', units: 'm'}, 
+	# 			x: {data: [1,2,3], title 'x', units: 'm'},
 	# 			y: {data: [1,4,9], title 'x^2', units: 'm^2'}
 	# 		}
 	# 	)
 	#
 	# will create a two dimensional graph that plots x^2 against x.
-	
+
 	def self.autocreate(*hashes)
 		Log.logf :autocreate
 		new(hashes[0].size).autocreate(*hashes)
 	end
-	
-	
+
+
 	def lx(*args) # :nodoc:
 		log_axis(*args)
 	end
-	
+
 	def lx=(val) # :nodoc:  (deprecated)
 		self.log_axis = val
 	end
-	
+
 	# Create a new graphkit without providing any labels.
 	#
 	# E.g.
 	# 	kit = GraphKit.quick_create(
 	# 		[
-	# 			[1,2,3], 
+	# 			[1,2,3],
 	# 			[1,4,9]
 	# 		]
 	# 	)
 	#
 	# will create a two dimensional graph that plots x^2 against x.
-	
+
 	def self.quick_create(*datasets)
 		hashes = datasets.map do |data|
 			hash = {}
@@ -390,14 +390,14 @@ class GraphKit < KitHash
 		end
 		autocreate(*hashes)
 	end
-	
-	
-	
+
+
+
 	def autocreate(*hashes) # :nodoc:  (see GraphKit.autocreate)
 		logf :autocreate
 		hashes.each{|hash| data.push DataKit.autocreate(hash)}
 # 		pp data
-		[:title, :label, :units, :range].each do |option| 
+		[:title, :label, :units, :range].each do |option|
 			data[0].axes.each do |key, axiskit|
 # 			next unless AXES.include? key
 				self[key + option] = axiskit[option].dup if axiskit[option]
@@ -407,9 +407,9 @@ class GraphKit < KitHash
 		check_integrity
 		self
 	end
-		
+
 	# Check that the graphkit conforms to specification; that the data has dimensions that make sense and that the titles and ranges have the right types.
-	
+
 	def check_integrity
 		logf :check_integrity
 		check(['data.class', Array], ['title.class', [String, NilClass]], ['has_legend.class', [Hash, NilClass]])
@@ -420,7 +420,7 @@ class GraphKit < KitHash
 # 				p instance_eval(prop.to_s + "[#{key.inspect}]"), 'ebb'
 				check(["#{key + prop}.class", klass])
 # 				check(["a key from #{prop}", key, AXES + [:f]])
-			end	
+			end
 		end
 		data.each do |datakit|
 			check(['class of a member of the data array', datakit.class, DataKit])
@@ -429,28 +429,28 @@ class GraphKit < KitHash
 		end
 		return true
 	end
-	
+
 # 	AXES.each do |axisname|
 # 		[:name, :label, :units, :range].each do |option|
 # 			define_method(axisname + option){self[option][axisname]}
 # 			define_method(axisname + option + '='.to_sym){|value| self[option][axisname] = value}
 # 		end
 # 	end
-	
+
 	@@old_gnuplot_sets = [ :dgrid3d, :title, :style, :term, :terminal, :pointsize, :log_axis, :key, :pm3d, :palette, :view, :cbrange, :contour, :nosurface, :cntrparam, :preamble, :xtics, :ytics]
-	
-	
+
+
 # 		@@gnuplot_sets.uniq!
-	
+
 	# Duplicate the graphkit.
-		
+
 	def dup
 		#logf :dup
 		#self.class.new(naxes, self)
 		eval(inspect)
 	end
-	
-	# Combine with another graph; titles and labels from the first graph will override the second. 
+
+	# Combine with another graph; titles and labels from the first graph will override the second.
 
 	def +(other)
 		check(['other.naxes', other.naxes, self.naxes])
@@ -460,7 +460,7 @@ class GraphKit < KitHash
 		new.data = self.data + other.data
 		new
 	end
-	
+
 	def extend_using(other, mapping = nil)
 		if mapping
 			mapping.each do |mine, others|
@@ -473,7 +473,7 @@ class GraphKit < KitHash
 			end
 		end
 	end
-	
+
 	def each_axiskit(*axes, &block)
 		axes = AXES unless axes.size > 0
 		axes.each do |axis|
@@ -495,7 +495,7 @@ class GraphKit < KitHash
 		shapes
 
 	end
-	
+
 	def transpose!
 		data.each do |datakit|
 			datakit.transpose!
@@ -503,7 +503,7 @@ class GraphKit < KitHash
 		self.xlabel, self.ylabel = ylabel, xlabel
 		self.xrange, self.yrange = xrange, yrange
 	end
-	
+
 				def convert(&block)
 					#ep 'Converting graph...'
 					kit = self.dup
@@ -521,7 +521,7 @@ class GraphKit < KitHash
 	  # E.g. convert a line of values of [x, y, z] with rank [1,1,2]
 	  # to a matrix of values [x, y, z] with rank [1, 1, 2]
 		#    convert_rank!([[1,1,1], [1,1,2]])
-	
+
 		def convert_rank!(from_to, options={})
 			ep "Converting Rank"
 			case from_to
@@ -566,21 +566,21 @@ class DataKit < KitHash
 						self.axes[:y].data=ynew
 						#p 'dk', self
 						self
-					
+
 				end
-	
+
 # 	include  Kit
 	include Log
 	AXES = GraphKit::AXES
-	AXES.each{|ax| define_method(ax){self.axes[ax]}} 
-	AXES.each{|ax| define_method(ax + "=".to_sym){|val| self.axes[ax] = val}} 
-	
-# 	attr_accessor :labels, :ranges, :has_legend, :units, :dimensions
-	
+	AXES.each{|ax| define_method(ax){self.axes[ax]}}
+	AXES.each{|ax| define_method(ax + "=".to_sym){|val| self.axes[ax] = val}}
 
-  def axes_array
+# 	attr_accessor :labels, :ranges, :has_legend, :units, :dimensions
+
+
+    def axes_array
 		self.axes.values_at(*AXES).compact
-	end
+    end
 	def initialize(options = {})
 		super()
 		self[:axes] = {}
@@ -590,14 +590,14 @@ class DataKit < KitHash
 	def self.autocreate(hash)
 		new.autocreate(hash)
 	end
-	
+
 	def autocreate(hash)
 		logf :autocreate
 		hash.each do |key, value|
 # 			puts value.inspect
 			if AXES.include? key
 				self[:axes][key] = AxisKit.autocreate(value)
-			else 
+			else
 				raise ArgumentError.new("bad key value pair in autocreate: #{key.inspect}, #{value.inspect}")
 			end
 # 			puts self[key].inspect
@@ -611,7 +611,7 @@ class DataKit < KitHash
 		check_integrity
 		self
 	end
-	
+
 	def check_integrity
 		logf :check_integrity
 		check(['title.class', [String, NilClass]], ['with.class', [String, NilClass]],  ['axes.class', Hash])
@@ -626,7 +626,7 @@ class DataKit < KitHash
 # 		end
 # 		puts 'checking f.class', f.class
 # 		check(['f.class', CodeRunner::FunctionKit])
-		
+
 # 		shape = f.shape
 		log 'checking ranks'
 		rnks = ranks
@@ -651,17 +651,17 @@ class DataKit < KitHash
 			#end
 			passed = false unless axes[:f].shape == [axes[:x].shape[0], axes[:y].shape[0], axes[:z].shape[0]]
 		end
-		raise IntegrityError.new(%[The dimensions of this data do not match: \n#{axes.inject(""){|str, (axis, axiskit)| str + "#{axis}: #{axiskit.shape}\n"}}\nranks: #{rnks}]) unless passed 
+		raise IntegrityError.new(%[The dimensions of this data do not match: \n#{axes.inject(""){|str, (axis, axiskit)| str + "#{axis}: #{axiskit.shape}\n"}}\nranks: #{rnks}]) unless passed
 # 		log 'finished checking ranks'
 		logfc :check_integrity
 # 		raise IntegrityError.new("function data must be a vector, or have the correct dimensions (or shape) for the axes: function dimensions: #{shape}; axes dimesions: #{axes_shape}") unless shape.size == 1 or axes_shape == shape
 		return true
 	end
-	
+
 		#ALLOWED_RANKS  = [[1], [1,1], [1,1,1], [1,1,2], [1,1,1,1], [1,1,2,2], [1,1,1,3]]
 		ALLOWED_RANKS = [[1], [1,1], [1,1,1], [1,1,2], [2,2,2], [2,2,2,2], [1,1,1,1], [1,1,2,2], [1,1,1,3], [3,3,3,3]]
 
-		def allowed_ranks 
+		def allowed_ranks
 			ALLOWED_RANKS
 		end
 		#def ranks_c_switch_hash
@@ -678,13 +678,13 @@ class DataKit < KitHash
 		logfc :shapes
 		return ans
 	end
-	
+
 	def rank_c_switch
 		#i = -1
 		#puts ALLOWED_RANKS.map{|r| i+=1;"#{i} --> #{r}"}
 		 switch = ALLOWED_RANKS.index(ranks)
 		switch
-		
+
 	end
 	def ranks
 		logf :ranks
@@ -692,14 +692,14 @@ class DataKit < KitHash
 		logfc :ranks
 		return ans
 	end
-	
+
 	def extend_using(other)
 		raise "A dataset can only be extended using another dataset with the same ranks: the ranks of this dataset are #{ranks} and the ranks of the other dataset are #{other.ranks}" unless ranks == other.ranks
 		axes.each do |key, axiskit|
 			axiskit.extend_using(other.axes[key])
 		end
 	end
-	
+
 # 	def gnuplot_ranks
 # 		case axes.size
 # 		when 1,2
@@ -715,7 +715,7 @@ class DataKit < KitHash
 # 			end
 # 		end
 # 	end
-# 	
+#
 # 	def gnuplot
 # # 		p axes.values_at(*AXES).compact.zip(gnuplot_ranks)
 # 		Gnuplot::DataSet.new(axes.values_at(*AXES).compact.zip(gnuplot_ranks).map{|axis, rank|  axis.data_for_gnuplot(rank) }) do |ds|
@@ -734,15 +734,15 @@ class DataKit < KitHash
 # 	# 					ds.linewidth = 4
 # 		end
 # 	end
-# 
+#
 # 	def gnuplot_options
 # 		@gnuplot_options ||= GnuplotPlotOptions.new
 # 		@gnuplot_options
 # 	end
-# 	
+#
 # 	alias :gp :gnuplot_options
-# 
-	
+#
+
 	AXES.each do |axisname|
 		define_method(axisname + :axis){self[:axes][axisname]}
 		define_method(axisname + :axis + '='.to_sym){|value| self[:axes][axisname] = value}
@@ -782,7 +782,7 @@ class DataKit < KitHash
 		if axes.size == 1
 			data = axes[:x].data
 			i = 0
-			loop do 
+			loop do
 				break if i > data.size - 2
 				should_be = (data[i+1] + data[i-1]) / 2.0
 				deviation = (should_be - data[i]).abs / data[i].abs
@@ -796,9 +796,9 @@ class DataKit < KitHash
 			x_data = axes[:x].data
 			data = axes[:y].data
 			i = 0
-			loop do 
+			loop do
 				jump = 1
-				loop do 
+				loop do
 					break if i > data.size - 1 - jump
 					break unless x_data[i+jump] == x_data[i-jump]
 					jump += 1
@@ -816,7 +816,7 @@ class DataKit < KitHash
 		end
 # 		p self.outliers
 	end
-	
+
 # 	def exclude_outliers
 # 		raise "Can only get rid of outliers for 1D or 2D data" if axes.size > 2
 # # 		self.outliers = []
@@ -829,25 +829,25 @@ class DataKit < KitHash
 # 				axes[:x].data.delete_at(index)
 # 				axes[:y].data.delete_at(index)
 # 			end
-# 
+#
 # 		end
 # 		check_integrity
 # 	end
 
-		
-	
+
+
 end
 
 
 class AxisKit < KitHash
-	
+
 # 	include  Kit
 	include Log
 		AXES = GraphKit::AXES
 
-	
+
 # 	attr_accessor :labels, :ranges, :has_legend, :units, :dimensions
-	
+
 	def initialize(hash = {})
 		super()
 		self.title = ""
@@ -855,25 +855,25 @@ class AxisKit < KitHash
 		self.
 		absorb hash
 	end
-	
+
 	def check_integrity
 		check(['units.class', [String]], ['scaling.class', [Float, NilClass]], ['label.class', [String, NilClass]], ['title.class', [String]])
 		check(['data.to_a.class', Array])
 	end
-	
+
 	def dup
 # 		puts 'i was called'
 		new = self.class.new(self)
 		new.data = data.dup
 		new
 	end
-	
+
 	def self.autocreate(hash)
 		new_kit = new(hash)
 		new_kit.label = "#{new_kit.title} (#{new_kit.units})"
 		new_kit
 	end
-	
+
 	def shape
 		logf :shape
 		if data.methods.include? :shape
@@ -902,7 +902,7 @@ class AxisKit < KitHash
 # 			raise TypeError("Bad Rank")
 # 		end
 # 	end
-		
+
 	def extend_using(other)
 		raise TypeError.new("Can only extend axes if data have the same ranks: #{shape.size}, #{other.shape.size}") unless shape.size == other.shape.size
 		raise TypeError.new("Can only extend axes if data have the same class") unless data.class == other.data.class
@@ -921,7 +921,7 @@ class AxisKit < KitHash
 			raise TypeError("Extending data with this rank: #{shape.size} is currently not implemented.")
 		end
 	end
-				
+
 end
 
 end # class GraphKit
@@ -938,6 +938,6 @@ if $0 == __FILE__
 
 end
 
-	
+
 # A graph kit is 'everything you need..
 #A graph kit is, in fact, a very intelligent hash

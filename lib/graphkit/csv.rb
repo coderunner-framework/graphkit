@@ -2,9 +2,8 @@ require 'matrix'
 # Methods for writing graphkits to csv (comma separated value) files
 
 class GraphKit
-  def to_csv(options={})	
+  def to_csv(options={})
     check_integrity
-    ep 'to_csv'
     stringio = options[:io] || StringIO.new
     data.each do |dk|
       dk.to_csv(options)
@@ -14,7 +13,7 @@ class GraphKit
   end
 
   class DataKit
-    class TensorArray 
+    class TensorArray
       def initialize(arr)
         @arr=arr
       end
@@ -54,7 +53,7 @@ class GraphKit
       io = ''
       case ranks
       when [1], [1,1], [1,1,1], [1,1,1,1]
-        dl.times do |n| 
+        dl.times do |n|
           dat.each{|d| io << d[n].to_s << ","}
           io << " " << edat.map{|e| e[n].to_s}.join(", ") if self.errors
           io << "\n"
@@ -131,7 +130,7 @@ class GraphKit
       end
 
       return stringio.string unless options[:io]
-      
+
       csv_file.write(io)
       csv_file.close()
     end

@@ -10,6 +10,27 @@ class TestGraphkit < Minitest::Unit::TestCase
     FileUtils.rm_r('test/test_output')
   end
 
+  def test_to_csv_single_dk
+    a = GraphKit.autocreate({x: {data: [1,2,3]},
+                             y: {data: [4,5,6]}})
+
+    a.to_csv({io:'test/test_output/csv_single_dk.csv'})
+
+    f = File.read('test/test_output/csv_single_dk.csv')
+    assert_equal(f, "\n1,4,\n2,5,\n3,6,\n")
+  end
+
+  def test_to_csv_single_dk_with_header
+    a = GraphKit.autocreate({x: {data: [1,2,3]},
+                             y: {data: [4,5,6]}})
+
+    a.to_csv({io:'test/test_output/csv_single_dk_with_header.csv',
+              header:'test1, test2'})
+
+    f = File.read('test/test_output/csv_single_dk_with_header.csv')
+    assert_equal(f, "test1, test2\n1,4,\n2,5,\n3,6,\n")
+  end
+
   def test_sparse_tensor_new
     t = SparseTensor.new(3)
     assert_equal(t.shape, [0,0,0])
